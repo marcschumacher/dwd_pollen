@@ -1,0 +1,8 @@
+{
+  "domain": "dwd_pollen",
+  "name": "DWD pollen sensor",
+  "documentation": "",
+  "dependencies": [],
+  "codeowners": [],
+  "requirements": []
+}
