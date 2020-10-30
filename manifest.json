@@ -1,8 +1,10 @@
 {
   "domain": "dwd_pollen",
   "name": "DWD pollen sensor",
-  "documentation": "",
+  "documentation": "https://github.com/marcschumacher/dwd_pollen/blob/master/README.md",
+  "issue_tracker": "https://github.com/marcschumacher/dwd_pollen/issues",
   "dependencies": [],
-  "codeowners": [],
-  "requirements": []
+  "codeowners": ["@marcschumacher"],
+  "requirements": [],
+  "config_flow": true
 }

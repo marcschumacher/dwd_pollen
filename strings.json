@@ -1,0 +1,21 @@
+{
+  "title": "DWD Pollen",
+  "config": {
+    "step": {
+      "init": {
+        "title": "DWD pollen",
+        "description": "Select which pollen to integrate",
+        "data": {
+          "partregion_id": "Region",
+          "pollen_type": "Pollen types",
+          "days": "Days to include"
+        }
+      }
+    },
+    "error": {
+      "invalid_configuration": "Invalid configuration"
+    },
+    "abort": {
+    }
+  }
+}

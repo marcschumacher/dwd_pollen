@@ -1,0 +1,20 @@
+{
+    "config": {
+        "abort": {},
+        "error": {
+            "invalid_configuration": "Fehlerhafte Konfiguration"
+        },
+        "step": {
+            "init": {
+                "data": {
+                    "days": "Tage",
+                    "partregion_id": "Region",
+                    "pollen_type": "Pollentypen"
+                },
+                "description": "Wähle die zu prüfenden Pollendaten",
+                "title": "DWD Pollen"
+            }
+        }
+    },
+    "title": "DWD Pollen"
+}
