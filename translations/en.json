@@ -1,11 +1,13 @@
 {
     "config": {
-        "abort": {},
+        "abort": {
+            "missing_values": "Missing values"
+        },
         "error": {
             "invalid_configuration": "Invalid configuration"
         },
         "step": {
-            "init": {
+            "user": {
                 "data": {
                     "days": "Days",
                     "partregion_id": "Region",

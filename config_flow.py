@@ -7,15 +7,14 @@ from .const import (
 )
 import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
-from . import get_pollen_data
 import logging
+from . import get_coordinator
 
 
 class DwdPollenSensorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """DWD Pollen config flow."""
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
-    _options = None
     _LOGGER = logging.getLogger(__name__)
 
     def __init__(self):
@@ -24,37 +23,38 @@ class DwdPollenSensorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None):
         """Handle a flow initialized by the user."""
 
+        coordinator = await get_coordinator(self.hass)
+
+        self._LOGGER.debug("DWD DATA: %s" % coordinator.data)
+
+        partregion_dict = await self.async_get_partregions(coordinator.data)
+
         if user_input is not None:
+            await self.async_set_unique_id(user_input[CONF_PARTREGION_ID])
+            self._abort_if_unique_id_configured()
+
             return self.async_create_entry(
-                title="%d/%s/%s" % (user_input[CONF_PARTREGION_ID] + "/",
-                                    user_input[CONF_POLLEN_TYPE] + "/",
-                                    user_input[CONF_DAYS]),
-                data={
-                    "partregion_id": user_input[CONF_PARTREGION_ID],
-                    "pollen_type": user_input[CONF_POLLEN_TYPE],
-                    "days": user_input[CONF_DAYS],
-                }
+                title=partregion_dict[user_input[CONF_PARTREGION_ID]],
+                data=user_input
             )
-
-        pollen_data = await get_pollen_data(self.hass)
-
-        self._LOGGER.debug("DWD DATA: %s" % pollen_data)
 
         data_schema = {
             vol.Required(CONF_PARTREGION_ID):
-                vol.In(await self.get_partregions(pollen_data)),
+                vol.In(partregion_dict),
             vol.Required(CONF_POLLEN_TYPE):
-                cv.multi_select(
-                    {
-                        'birke': 'Birke',
-                        'graeser': 'Gräser',
-                        'esche': 'Esche',
-                        'erle': 'Erle',
-                        'hasel': 'Hasel',
-                        'beifuss': 'Beifuss',
-                        'ambrosia': 'Ambrosia',
-                        'roggen': 'Roggen'
-                    }),
+                vol.All(
+                    cv.multi_select(
+                        {
+                            'birke': 'Birke',
+                            'graeser': 'Gräser',
+                            'esche': 'Esche',
+                            'erle': 'Erle',
+                            'hasel': 'Hasel',
+                            'beifuss': 'Beifuss',
+                            'ambrosia': 'Ambrosia',
+                            'roggen': 'Roggen'
+                        })
+                ),
             vol.Required(CONF_DAYS):
                 cv.multi_select(
                     {
@@ -64,9 +64,9 @@ class DwdPollenSensorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     }),
         }
 
-        return self.async_show_form(step_id="init", data_schema=vol.Schema(data_schema))
+        return self.async_show_form(step_id="user", data_schema=vol.Schema(data_schema))
 
-    async def get_partregions(self, pollen_data):
+    async def async_get_partregions(self, pollen_data):
         result = {}
         for entry in pollen_data['content']:
             partregion_id = entry['partregion_id']
