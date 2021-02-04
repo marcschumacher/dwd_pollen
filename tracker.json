@@ -1,0 +1,14 @@
+{
+    "dwd_pollen": {
+        "updated_at": "2021-02-04",
+        "version": "0.0.1",
+        "local_location": "/custom_components/dwd_pollen/__init__.py",
+        "remote_location": "https://raw.githubusercontent.com/marcschumacher/dwd_pollen/master/custom_components/dwd_pollen/__init__.py",
+        "visit_repo": "https://raw.githubusercontent.com/marcschumacher/dwd_pollen",
+        "changelog": "https://raw.githubusercontent.com/marcschumacher/dwd_pollen/releases/latest",
+        "resources": [
+            "https://raw.githubusercontent.com/marcschumacher/dwd_pollen/master/custom_components/dwd_pollen/manifest.json",
+            "https://raw.githubusercontent.com/marcschumacher/dwd_pollen/master/custom_components/dwd_pollen/sensor.py"
+        ]
+    }
+}

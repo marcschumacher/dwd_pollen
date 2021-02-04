@@ -32,6 +32,8 @@ REST_API_KEY_REGION_NAME = 'region_name'
 
 REST_API_KEY_PARTREGION_ID = 'partregion_id'
 
+REST_API_KEY_REGION_ID = 'region_id'
+
 REST_API_KEY_CONTENT = 'content'
 
 REST_API_KEY_LAST_UPDATE = "last_update"
@@ -72,14 +74,15 @@ DAY_ADJUSTMENTS = {
     'dayafter_tomorrow': 2}
 
 
-def setup_platform(hass, config, add_entities, discovery_info=None):
+async def async_setup_platform(hass, config, add_entities, discovery_info=None):
     """Set up the DWD pollen sensor."""
     entity_name = config.get(CONF_NAME)
     partregion_ids = config.get(CONF_PARTREGION_IDS)
     include_pollen = config.get(CONF_INCLUDE_POLLEN)
     include_days = config.get(CONF_INCLUDE_DAYS)
 
-    api = DwdPollenAPI(partregion_ids)
+    api = DwdPollenAPI(hass, partregion_ids)
+    await api.async_update()
 
     sensors = []
     for partregion_id in partregion_ids:
@@ -103,24 +106,23 @@ class DwdPollenAPI:
     sensordata[<region_id>]['pollendata'][<pollen_name>]['today'|'today_mapped'|'tomorrow'|'tomorrow_mapped'|'dayafter_tomorrow'|'dayafter_tomorrow_mapped']
     """
 
-    def __init__(self, partregion_ids):
+    def __init__(self, hass, partregion_ids):
         """Initialize the data object."""
         resource = "https://opendata.dwd.de/climate_environment/health/alerts/s31fg.json"
 
-        self._rest = RestData('GET', resource, None, None, None, True)
+        self._rest = RestData(hass, 'GET', resource, None, None, None, None, True)
         self._partregion_ids = partregion_ids
         self.last_update = None
         self.sensordata = {}
         self.api_id_to_descr = {}
         self.available = False
-        self.update()
 
     @Throttle(SCAN_INTERVAL)
-    def update(self):
+    async def async_update(self):
         """Get the latest pollen_name data from DWD open data site."""
         try:
             # Update DWD weather data by calling rest service
-            self._rest.update()
+            await self._rest.async_update()
             # Retrieve REST data from correspionding object
             rest_api_result = json.loads(self._rest.data)
 
@@ -132,6 +134,9 @@ class DwdPollenAPI:
             for partregion_data in rest_api_result[REST_API_KEY_CONTENT]:
 
                 current_partregion_id = partregion_data[REST_API_KEY_PARTREGION_ID]
+
+                if current_partregion_id == -1:
+                    current_partregion_id = partregion_data[REST_API_KEY_REGION_ID]
 
                 # Is the current partregion_id included in the ones we should parse?
                 if current_partregion_id in self._partregion_ids:
@@ -335,9 +340,9 @@ class DwdPollenSensor(Entity):
         """Could the device be accessed during the last update call."""
         return self._api.available
 
-    def update(self):
+    async def async_update(self):
         """Get the latest data from the DWD-Weather-Warnings API."""
-        self._api.update()
+        await self._api.async_update()
 
 
 class DwdPollenStatisticSensor(Entity):
@@ -399,6 +404,6 @@ class DwdPollenStatisticSensor(Entity):
         """Could the device be accessed during the last update call."""
         return self._api.available
 
-    def update(self):
+    async def async_update(self):
         """Get the latest data from the DWD-Weather-Warnings API."""
-        self._api.update()
+        await self._api.async_update()
